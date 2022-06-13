@@ -54,6 +54,7 @@ export function computed<T>(
     setter = getterOrOptions.set
   }
 
+  //lzh：computed的实现是基于watcher
   const watcher = isServerRendering()
     ? null
     : new Watcher(currentInstance, getter, noop, { lazy: true })

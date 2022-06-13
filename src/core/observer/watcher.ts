@@ -126,6 +126,8 @@ export default class Watcher implements DepTarget {
     let value
     const vm = this.vm
     try {
+      //lzh：这里就调用匿名函数，第二个参数在vm实例上获取watcher监听的属性，
+      //进而触发自定义的reactive getter进行依赖收集
       value = this.getter.call(vm, vm)
     } catch (e: any) {
       if (this.user) {
@@ -137,6 +139,8 @@ export default class Watcher implements DepTarget {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
+        //lzh：这里递归触发value对象内部属性的getter触发依赖收集，每个递归property的dep的target都是当前watcher！！
+        //因为下面才popTarget()，这样就做到了deep监听
         traverse(value)
       }
       popTarget()
@@ -170,6 +174,7 @@ export default class Watcher implements DepTarget {
         dep.removeSub(this)
       }
     }
+    //lzh：把关联了当前watcher的所有上游dep都转存到depIds和deps中，清空newDepIds和newDeps
     let tmp: any = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
@@ -191,6 +196,7 @@ export default class Watcher implements DepTarget {
     } else if (this.sync) {
       this.run()
     } else {
+      //lzh：调度当前watcher
       queueWatcher(this)
     }
   }

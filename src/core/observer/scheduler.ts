@@ -14,6 +14,8 @@ let has: { [key: number]: true | undefined | null } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
 let flushing = false
+
+//lzh：全局计数器，当前正在处理队列中的第几个watcher
 let index = 0
 
 /**
@@ -160,6 +162,7 @@ export function queueWatcher(watcher: Watcher) {
     return
   }
 
+  //TODO lzh：第一个条件应该是指如果当前watcher正在参与依赖收集
   if (watcher === Dep.target && watcher.noRecurse) {
     return
   }

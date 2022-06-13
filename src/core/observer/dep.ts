@@ -66,6 +66,7 @@ export default class Dep {
             ...info
           })
       }
+      //lzh：通知所有此dep收集的关注此变化的watcher有变化发生
       subs[i].update()
     }
   }

@@ -26,6 +26,7 @@ function _traverse(val: any, seen: SimpleSet) {
     return
   }
   if (val.__ob__) {
+    //lzh：这个dep来自于new Observer的时候内部创建的dep，有__ob__的一定是Object，property没有__ob__
     const depId = val.__ob__.dep.id
     if (seen.has(depId)) {
       return
@@ -38,6 +39,7 @@ function _traverse(val: any, seen: SimpleSet) {
   } else {
     keys = Object.keys(val)
     i = keys.length
+    //lzh：这里val[keys[i]]触发了reactive的getter，会触发依赖收集
     while (i--) _traverse(val[keys[i]], seen)
   }
 }

@@ -158,12 +158,14 @@ export function defineReactive(
     val = obj[key]
   }
 
+  //把当前属性的值递归做成可响应
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter() {
       const value = getter ? getter.call(obj) : val
+      //lzh：Dep.target即watcher实例
       if (Dep.target) {
         if (__DEV__) {
           dep.depend({
@@ -172,9 +174,11 @@ export function defineReactive(
             key
           })
         } else {
+          //lzh：把当前watcher和当前property的dep相互关联（依赖收集）
           dep.depend()
         }
         if (childOb) {
+          //lzh:这里把当前watcher和子对象的dep相互关联了（依赖收集）
           childOb.dep.depend()
           if (isArray(value)) {
             dependArray(value)
@@ -202,6 +206,7 @@ export function defineReactive(
       } else {
         val = newVal
       }
+      //lzh：新设的值如果是对象，也要做成响应性的
       childOb = !shallow && observe(newVal)
       if (__DEV__) {
         dep.notify({
