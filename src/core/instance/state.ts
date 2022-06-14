@@ -172,6 +172,7 @@ export function getData(data: Function, vm: Component): any {
   }
 }
 
+//lzh：computed实现背后的watcher都是lazy的
 const computedWatcherOptions = { lazy: true }
 
 function initComputed(vm: Component, computed: Object) {
@@ -254,6 +255,8 @@ function createComputedGetter(key) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
+      //lzh：这里设计很精妙，处理了watcher1监听computed的情况，watcher.depend()实际效果让Dep.target具备了
+      //和watcher一样的属性监听能力，相当于“复制”，这样一个属性变化的时候，watcher1和computed watcher都能被notify、update
       if (Dep.target) {
         if (__DEV__ && Dep.target.onTrack) {
           Dep.target.onTrack({

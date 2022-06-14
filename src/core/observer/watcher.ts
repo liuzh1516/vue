@@ -93,6 +93,8 @@ export default class Watcher implements DepTarget {
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
+    //lzh：对于计算属性的watcher，dirty初始为true，便于render调用computed getter的时候，触发watcher的evaluate()，
+    //进而触发get进行依赖收集
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
     this.newDeps = []
@@ -126,7 +128,7 @@ export default class Watcher implements DepTarget {
     let value
     const vm = this.vm
     try {
-      //lzh：这里就调用匿名函数，第二个参数在vm实例上获取watcher监听的属性，
+      //lzh：这里就调用匿名函数，第二个参数在vm实例上获取watcher监听的属性，包括计算属性在内！！
       //进而触发自定义的reactive getter进行依赖收集
       value = this.getter.call(vm, vm)
     } catch (e: any) {
@@ -242,11 +244,14 @@ export default class Watcher implements DepTarget {
    */
   evaluate() {
     this.value = this.get()
+    //lzh：重新计算一次新值后，就把ditry设为false，以防止后续在value未变化的情况下watcher.evaluate被调用，优化性能
     this.dirty = false
   }
 
   /**
    * Depend on all deps collected by this watcher.
+   * lzh：这里的意思是，把一个目标watcher（当前Dep.target）添加到当前watcher的所有Dep的subs里去
+   * 相当于让目标watcher监听了和当前watcher相同的属性列表
    */
   depend() {
     let i = this.deps.length
