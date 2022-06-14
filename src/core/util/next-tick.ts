@@ -5,15 +5,19 @@ import { handleError } from './error'
 import { isIE, isIOS, isNative } from './env'
 
 export let isUsingMicroTask = false
-
+//lzh：将flashSchedulerQueue函数和用户通过调用nexttick传入的回调函数存入
 const callbacks: Array<Function> = []
 let pending = false
 
 function flushCallbacks() {
+  //lzh：Promise.then微任务运行的时候，放开
   pending = false
+  //lzh：把当前已存的回调复制一份，准备进行处理
   const copies = callbacks.slice(0)
+  //lzh：置空，继续收集待处理的回调
   callbacks.length = 0
   for (let i = 0; i < copies.length; i++) {
+    //触发回调函数
     copies[i]()
   }
 }
@@ -41,6 +45,7 @@ let timerFunc
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
+    //lzh：flushCallbacks闭包持有了
     p.then(flushCallbacks)
     // In problematic UIWebViews, Promise.then doesn't completely break, but
     // it can get stuck in a weird state where callbacks are pushed into the

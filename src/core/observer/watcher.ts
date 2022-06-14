@@ -192,6 +192,7 @@ export default class Watcher implements DepTarget {
   update() {
     /* istanbul ignore else */
     if (this.lazy) {
+      //lzh：computed实现走这
       this.dirty = true
     } else if (this.sync) {
       this.run()

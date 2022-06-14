@@ -169,8 +169,11 @@ export function queueWatcher(watcher: Watcher) {
 
   has[id] = true
   if (!flushing) {
+    //lzh：如果浏览器事件循环未开始处理，则加到队尾
     queue.push(watcher)
   } else {
+    //lzh：如果已经在处理了，则根据watcher的id进行冒泡（在flushSchedulerQueue开始的时候已经进行了按watcher id从小到大排序）
+    //TODO lzh：但是这里有个疑问，js中不存在真正的异步，所以这个地方永远不会执行到？？
     // if already flushing, splice the watcher based on its id
     // if already past its id, it will be run next immediately.
     let i = queue.length - 1
@@ -181,12 +184,14 @@ export function queueWatcher(watcher: Watcher) {
   }
   // queue the flush
   if (!waiting) {
+    //lzh：waiting标记保证一次set变更只向事件循环队列中添加一个异步任务
     waiting = true
 
     if (__DEV__ && !config.async) {
       flushSchedulerQueue()
       return
     }
+    //lzh：flushSchedulerQueue通过闭包持有了queue，以便将来某个时刻能针对queue进行flush
     nextTick(flushSchedulerQueue)
   }
 }
